@@ -13,7 +13,10 @@ you already know what's in play, and that skews every question you ask.
 ./guess "cats"
 ```
 
-- Claude picks two well-known characters in that category
+- Claude picks two famous characters in that category, deliberately from
+  opposite corners of it — for "cats", think Meowth and Hello Kitty, not two
+  cats from the same cartoon
+- Real people count. Jesus, Princess Diana, and Meowth are all fair game
 - You get an email with **her** character
 - She gets an email with **your** character
 - Neither of you knows your own — start asking

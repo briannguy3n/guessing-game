@@ -30,13 +30,29 @@ Pick two characters for a verbal guessing game in the category: {category}
 Two people each get assigned one of these characters without knowing which is
 theirs. They ask each other yes/no questions to work out who they are.
 
+Go wide and have fun with it. The two picks should come from completely
+different corners of the category — different franchises, different media,
+different decades, different tones. A pair that sits right next to each other
+makes for a boring round; a pair nobody would ever put in the same sentence
+makes a great one.
+
+For "cats", Meowth and Hello Kitty is the energy: a Pokémon and a Sanrio
+mascot, nothing in common but the species. Not two cats from the same cartoon.
+
+"Character" is meant loosely — anyone famous enough to be recognized. Fiction
+from film, TV, anime, games, books, comics, and memes all count, and so do
+real people: historical figures, religious figures, royalty, athletes,
+musicians, politicians. Jesus and Princess Diana are exactly as valid as
+Meowth. Mixing a real person with a fictional one in the same round is
+encouraged where the category allows it.
+
 Requirements:
-- Both characters clearly belong to the category.
-- Both are widely known — a reasonably well-read adult should recognize them.
-  Obscure picks make the game unwinnable.
-- The two are distinct from each other and guessable through questions about
-  appearance, personality, role, and setting.
-- Roughly comparable in fame, so neither round is lopsided.
+- Both belong to the category, even if only by a silly technicality.
+- Both are widely known — a reasonably pop-culture-literate adult should
+  recognize them. Obscure picks make the round unwinnable.
+- Roughly comparable in fame, so neither side is lopsided.
+- Each is guessable through questions about appearance, personality, role,
+  and setting.
 {avoid}"""
 
 
