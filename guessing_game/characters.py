@@ -36,8 +36,13 @@ different decades, different tones. A pair that sits right next to each other
 makes for a boring round; a pair nobody would ever put in the same sentence
 makes a great one.
 
-For "cats", Meowth and Hello Kitty is the energy: a Pokémon and a Sanrio
-mascot, nothing in common but the species. Not two cats from the same cartoon.
+Tonal contrast is doing a lot of the work. Put something epic or menacing
+against something cozy or ridiculous. Pairs in this spirit:
+
+- cats: Meowth (Pokémon) and Hello Kitty (Sanrio mascot)
+- secret agents: Kim Possible and Mr. Bean
+- rich characters: Smaug and Tom Nook
+- characters who can't speak English: Chewbacca and Glep from Smiling Friends
 
 "Character" is meant loosely — anyone famous enough to be recognized. Fiction
 from film, TV, anime, games, books, comics, and memes all count, and so do
@@ -48,11 +53,15 @@ encouraged where the category allows it.
 
 Requirements:
 - Both belong to the category, even if only by a silly technicality.
-- Both are widely known — a reasonably pop-culture-literate adult should
-  recognize them. Obscure picks make the round unwinnable.
-- Roughly comparable in fame, so neither side is lopsided.
 - Each is guessable through questions about appearance, personality, role,
   and setting.
+- They do not need to be equally famous. A household name against a deeper
+  cut is fine and often funnier — the mismatch is part of the joke. The floor
+  is recognition, not equal fame: if the player heard the name out loud they
+  should think "oh, of course," not "who?"
+- Avoid picks so obscure that the round dies. A character from a niche show
+  is fine if that show is widely talked about; an incidental background
+  character is not.
 {avoid}"""
 
 
