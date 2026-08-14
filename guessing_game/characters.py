@@ -1,4 +1,4 @@
-"""Ask Claude for two characters that fit a category."""
+"""Ask Claude for characters that fit a category."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ class Pick(BaseModel):
 
 
 class Round(BaseModel):
-    picks: list[Pick] = Field(description="Exactly two distinct characters.")
+    picks: list[Pick] = Field(description="The requested number of distinct characters.")
 
 
 class GenerationError(Exception):
@@ -25,19 +25,20 @@ class GenerationError(Exception):
 
 
 PROMPT = """\
-Pick two characters for a verbal guessing game in the category: {category}
+Pick {count} characters for a verbal guessing game in the category: {category}
 
-Two people each get assigned one of these characters without knowing which is
-theirs. They ask each other yes/no questions to work out who they are.
+{count} people each get assigned one of these characters without knowing which
+is theirs. Everyone can see everyone else's character but their own. They ask
+each other yes/no questions to work out who they are.
 
-Go wide and have fun with it. The two picks should come from completely
-different corners of the category — different franchises, different media,
-different decades, different tones. A pair that sits right next to each other
-makes for a boring round; a pair nobody would ever put in the same sentence
-makes a great one.
+Go wide and have fun with it. The picks should come from completely different
+corners of the category — different franchises, different media, different
+decades, different tones. Picks that sit right next to each other make for a
+boring round; a line-up nobody would ever put in the same sentence makes a
+great one. No two picks should feel like near-neighbours of each other.
 
 Tonal contrast is doing a lot of the work. Put something epic or menacing
-against something cozy or ridiculous. Pairs in this spirit:
+against something cozy or ridiculous. Pairings in this spirit:
 
 - cats: Meowth (Pokémon) and Hello Kitty (Sanrio mascot)
 - secret agents: Kim Possible and Mr. Bean
@@ -48,11 +49,11 @@ against something cozy or ridiculous. Pairs in this spirit:
 from film, TV, anime, games, books, comics, and memes all count, and so do
 real people: historical figures, religious figures, royalty, athletes,
 musicians, politicians. Jesus and Princess Diana are exactly as valid as
-Meowth. Mixing a real person with a fictional one in the same round is
+Meowth. Mixing real people with fictional ones in the same round is
 encouraged where the category allows it.
 
 Requirements:
-- Both belong to the category, even if only by a silly technicality.
+- Every pick belongs to the category, even if only by a silly technicality.
 - Each is guessable through questions about appearance, personality, role,
   and setting.
 - They do not need to be equally famous. A household name against a deeper
@@ -65,7 +66,10 @@ Requirements:
 {avoid}"""
 
 
-def generate(category: str, model: str, avoid: list[str]) -> list[Pick]:
+def generate(category: str, model: str, avoid: list[str], count: int = 2) -> list[Pick]:
+    if count < 2:
+        raise GenerationError("A round needs at least two characters.")
+
     client = anthropic.Anthropic()
 
     avoid_clause = ""
@@ -82,7 +86,9 @@ def generate(category: str, model: str, avoid: list[str]) -> list[Pick]:
         messages=[
             {
                 "role": "user",
-                "content": PROMPT.format(category=category.strip(), avoid=avoid_clause),
+                "content": PROMPT.format(
+                    count=count, category=category.strip(), avoid=avoid_clause
+                ),
             }
         ],
     )
@@ -91,7 +97,11 @@ def generate(category: str, model: str, avoid: list[str]) -> list[Pick]:
         raise GenerationError("Claude declined this category. Try a different one.")
 
     result = response.parsed_output
-    if result is None or len(result.picks) != 2:
-        raise GenerationError("Claude did not return two characters. Try again.")
+    if result is None or len(result.picks) != count:
+        raise GenerationError(f"Claude did not return {count} characters. Try again.")
+
+    names = [p.name.strip().lower() for p in result.picks]
+    if len(set(names)) != len(names):
+        raise GenerationError("Claude repeated a character. Try again.")
 
     return result.picks

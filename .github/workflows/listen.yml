@@ -1,0 +1,52 @@
+name: Check for round requests
+
+on:
+  schedule:
+    # GitHub only honours this on the default branch, and timing drifts under
+    # load. Five minutes is the floor it accepts.
+    - cron: "*/5 * * * *"
+  # Lets you test the hosted path from a branch before merging.
+  workflow_dispatch:
+
+# Two overlapping polls would send the same round twice.
+concurrency:
+  group: guessing-game-listener
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Poll inbox and start any requested rounds
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: python -m guessing_game.listen
+
+      - name: Remember this round so characters never repeat
+        run: |
+          git config user.name "guessing-game bot"
+          git config user.email "actions@github.com"
+          # Either file may not exist yet on the first ever run.
+          git add .history.jsonl .round-counts.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nothing to save."
+            exit 0
+          fi
+          git commit -m "Record round"
+          # Another run may have pushed while this one played a round.
+          git pull --rebase --autostash
+          git push
