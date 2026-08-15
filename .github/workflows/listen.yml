@@ -40,8 +40,8 @@ jobs:
         run: |
           git config user.name "guessing-game bot"
           git config user.email "actions@github.com"
-          # Either file may not exist yet on the first ever run.
-          git add .history.jsonl .round-counts.json 2>/dev/null || true
+          # Any of these may not exist yet on the first ever run.
+          git add .history.jsonl .round-counts.json .handled-mail.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nothing to save."
             exit 0

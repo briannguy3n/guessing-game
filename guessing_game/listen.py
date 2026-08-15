@@ -3,6 +3,9 @@
 Runs a single poll and exits, which suits a cron or scheduled CI job better
 than a long-lived daemon. Log output names groups, senders and categories —
 never a character.
+
+Reading is strictly read-only: no flags are changed, nothing is marked read,
+nothing is moved. What has already been handled is remembered here instead.
 """
 
 from __future__ import annotations
@@ -12,9 +15,14 @@ import sys
 from . import characters, inbox, rounds
 from .config import HISTORY_PATH, REPO_ROOT, ConfigError, load_config
 from .delivery import EmailNotifier
-from .router import DailyLimit, Rejected, classify
+from .inbox import LOOKBACK_DAYS
+from .router import DailyLimit, Handled, Rejected, classify
 
 COUNTS_PATH = REPO_ROOT / ".round-counts.json"
+HANDLED_PATH = REPO_ROOT / ".handled-mail.json"
+
+# Keep ids a little longer than the poll window so nothing slips back in.
+HANDLED_KEEP_DAYS = LOOKBACK_DAYS + 1
 
 
 def _confirm(notifier: EmailNotifier, to: str, category: str) -> None:
@@ -35,65 +43,77 @@ def process_once() -> int:
     config = load_config()
     notifier = EmailNotifier(config)
     limit = DailyLimit(COUNTS_PATH, config.daily_round_limit)
-    handled = 0
+    handled = Handled(HANDLED_PATH, HANDLED_KEEP_DAYS)
+    started = 0
 
-    with inbox.connect(config) as client:
-        for envelope in inbox.unread(client):
-            outcome = classify(envelope, config)
+    # Mail already sitting in the window when this record is first created was
+    # sent before anything was watching. Acting on it would replay old rounds.
+    priming = not HANDLED_PATH.exists()
+    if priming:
+        print("First run: noting what is already in the inbox without acting on it.")
 
-            if isinstance(outcome, Rejected):
-                print(f"skipped ({outcome.reason})")
-                if outcome.notify:
+    try:
+        with inbox.connect(config) as client:
+            for envelope in inbox.recent(client):
+                if envelope.message_id in handled:
+                    continue
+                if priming:
+                    handled.add(envelope.message_id)
+                    continue
+
+                outcome = classify(envelope, config)
+                handled.add(envelope.message_id)
+
+                if isinstance(outcome, Rejected):
+                    # Most of these are ordinary inbox mail, not failed triggers.
+                    print(f"ignored ({outcome.reason})")
+                    if outcome.notify:
+                        _decline(
+                            notifier,
+                            outcome.notify,
+                            "Put the category in the subject line, then send again.",
+                        )
+                    continue
+
+                if limit.exceeded(outcome.group.name):
+                    print(f"skipped (daily limit reached for {outcome.group.name})")
                     _decline(
                         notifier,
-                        outcome.notify,
-                        "Put the category in the subject line, then send again.",
+                        outcome.requester,
+                        "That group has hit its round limit for today. Try again tomorrow.",
                     )
-                inbox.mark_read(client, envelope.uid)
-                continue
+                    continue
 
-            if limit.exceeded(outcome.group.name):
-                print(f"skipped (daily limit reached for {outcome.group.name})")
-                _decline(
-                    notifier,
-                    outcome.requester,
-                    "That group has hit its round limit for today. Try again tomorrow.",
-                )
-                inbox.mark_read(client, envelope.uid)
-                continue
+                try:
+                    rounds.play(outcome.category, outcome.group, config, notifier, HISTORY_PATH)
+                except characters.GenerationError as error:
+                    print(f"generation failed for {outcome.group.name}")
+                    _decline(notifier, outcome.requester, str(error))
+                    continue
+                except Exception:
+                    # Never surface the detail: a traceback can carry a character name.
+                    print(f"round failed for {outcome.group.name}")
+                    _decline(
+                        notifier,
+                        outcome.requester,
+                        "Something went wrong starting that round. Nothing was sent.",
+                    )
+                    continue
 
-            try:
-                rounds.play(
-                    outcome.category, outcome.group, config, notifier, HISTORY_PATH
-                )
-            except characters.GenerationError as error:
-                print(f"generation failed for {outcome.group.name}")
-                _decline(notifier, outcome.requester, str(error))
-                inbox.mark_read(client, envelope.uid)
-                continue
-            except Exception:
-                # Never surface the detail: a traceback can carry a character name.
-                print(f"round failed for {outcome.group.name}")
-                _decline(
-                    notifier,
-                    outcome.requester,
-                    "Something went wrong starting that round. Nothing was sent.",
-                )
-                inbox.mark_read(client, envelope.uid)
-                continue
+                limit.record(outcome.group.name)
+                _confirm(notifier, outcome.requester, outcome.category)
+                started += 1
+                print(f"sent round for {outcome.group.name}: {outcome.category}")
+    finally:
+        # Save even on a crash, so a half-finished pass cannot replay a round.
+        handled.save()
 
-            limit.record(outcome.group.name)
-            inbox.mark_read(client, envelope.uid)
-            _confirm(notifier, outcome.requester, outcome.category)
-            handled += 1
-            print(f"sent round for {outcome.group.name}: {outcome.category}")
-
-    return handled
+    return started
 
 
 def main() -> int:
     try:
-        handled = process_once()
+        started = process_once()
     except ConfigError as error:
         print(f"Setup problem: {error}", file=sys.stderr)
         return 1
@@ -101,7 +121,7 @@ def main() -> int:
         print(f"Could not check the inbox: {type(error).__name__}", file=sys.stderr)
         return 1
 
-    print(f"Done. Rounds started: {handled}")
+    print(f"Done. Rounds started: {started}")
     return 0
 
 

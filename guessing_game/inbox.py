@@ -1,8 +1,11 @@
 """Reading trigger emails out of the inbox over IMAP.
 
-Gmail's own unread flag is the record of what has already been handled, so
-there is no local state to keep in sync. A message is marked read only after
-its round has been dealt with.
+This never modifies the mailbox. It reads a recent window of mail and leaves
+every flag alone — the caller remembers which message ids it has handled.
+
+Using the unread flag for that would be wrong twice over: opening your own
+trigger email in Gmail would hide it from the poller, and unrelated mail would
+get marked read just for being looked at.
 """
 
 from __future__ import annotations
@@ -11,6 +14,7 @@ import email
 import imaplib
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from email.header import decode_header, make_header
 from email.message import Message
 from email.utils import getaddresses
@@ -18,13 +22,14 @@ from email.utils import getaddresses
 from .config import Config
 from .delivery import OWN_MAIL_HEADER
 
-# Gmail rejects an unqualified fetch of a huge mailbox; we only ever want new mail.
-UNSEEN = "(UNSEEN)"
+# How far back each poll looks. Anything older is assumed dead.
+LOOKBACK_DAYS = 2
 
 
 @dataclass(frozen=True)
 class Envelope:
     uid: str
+    message_id: str
     sender: str
     recipients: list[str]
     subject: str
@@ -89,15 +94,15 @@ def connect(config: Config):
             pass
 
 
-def unread(client) -> list[Envelope]:
-    status, data = client.search(None, UNSEEN)
+def recent(client, days: int = LOOKBACK_DAYS) -> list[Envelope]:
+    since = (datetime.now() - timedelta(days=days)).strftime("%d-%b-%Y")
+    status, data = client.search(None, f"(SINCE {since})")
     if status != "OK" or not data or not data[0]:
         return []
 
     envelopes = []
     for uid in data[0].split():
-        # BODY.PEEK leaves the message unread, so a crash mid-round does not
-        # silently swallow the trigger — it gets retried on the next poll.
+        # PEEK so that reading the mailbox never marks anything read.
         status, payload = client.fetch(uid, "(BODY.PEEK[])")
         if status != "OK" or not payload or not isinstance(payload[0], tuple):
             continue
@@ -107,6 +112,7 @@ def unread(client) -> list[Envelope]:
         envelopes.append(
             Envelope(
                 uid=uid.decode(),
+                message_id=_text(message.get("Message-ID")) or f"uid:{uid.decode()}",
                 sender=senders[0] if senders else "",
                 recipients=_addresses(message, "To", "Cc", "Delivered-To", "X-Original-To"),
                 subject=_text(message.get("Subject")),
@@ -119,7 +125,3 @@ def unread(client) -> list[Envelope]:
             )
         )
     return envelopes
-
-
-def mark_read(client, uid: str) -> None:
-    client.store(uid, "+FLAGS", "\\Seen")

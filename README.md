@@ -53,6 +53,15 @@ emails everyone. You get a confirmation that deliberately tells you nothing.
 Plus-addressing means one mailbox serves every group — `you+chimgee@` and
 `you+friends@` both land in your normal inbox, and the tag picks the group.
 
+The trigger works whether the email is read or unread — open it, star it,
+archive it, it makes no difference. The listener never changes anything in
+your mailbox; it keeps its own note of which messages it has handled, in
+`.handled-mail.json`.
+
+The very first run has nothing to compare against, so it records what is
+already in the inbox and acts on none of it. That stops old mail replaying
+rounds. Send your trigger after that first run.
+
 What gets ignored, silently:
 
 - Mail from anyone outside that group's roster

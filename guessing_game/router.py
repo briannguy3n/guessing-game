@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from .config import GROUP_NAME_PATTERN, Config, ConfigError, Group, load_group
@@ -121,6 +121,39 @@ def classify(envelope: Envelope, config: Config) -> Request | Rejected:
         return Rejected("no category in subject or body", notify=envelope.sender)
 
     return Request(group=group, category=category, requester=envelope.sender)
+
+
+class Handled:
+    """Message ids already dealt with, so a poll never repeats itself.
+
+    This replaces the mailbox read flag. Nothing we do changes the user's mail.
+    """
+
+    def __init__(self, path: Path, keep_days: int) -> None:
+        self._path = path
+        self._keep_days = keep_days
+        self._seen = self._load()
+
+    def _load(self) -> dict:
+        if not self._path.exists():
+            return {}
+        try:
+            data = json.loads(self._path.read_text())
+        except (ValueError, OSError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    def __contains__(self, message_id: str) -> bool:
+        return message_id in self._seen
+
+    def add(self, message_id: str) -> None:
+        self._seen[message_id] = date.today().isoformat()
+
+    def save(self) -> None:
+        cutoff = (date.today() - timedelta(days=self._keep_days)).isoformat()
+        # Ids older than the poll window can never come back round again.
+        self._seen = {k: v for k, v in self._seen.items() if v >= cutoff}
+        self._path.write_text(json.dumps(self._seen))
 
 
 class DailyLimit:
