@@ -1,4 +1,4 @@
-"""Start a round: ./guess "cats"
+"""Start a game: ./guess "cats"
 
 Prints only whether the messages were sent. It must never print, log, or
 otherwise reveal either character — the person running this is a player.
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     except Exception:
         # Deliberately terse: a traceback here could surface a character name.
-        print("Something went wrong sending the round. Nothing was recorded.", file=sys.stderr)
+        print("Something went wrong sending the game. Nothing was recorded.", file=sys.stderr)
         return 1
 
     print(f"Sent. Category: {args.category}")

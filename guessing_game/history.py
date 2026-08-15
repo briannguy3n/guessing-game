@@ -1,7 +1,7 @@
 """Past picks, stored so the generator never repeats a character.
 
 Entries are base64-encoded: not security, just so an accidental `cat` of the
-file doesn't spoil a round that's still being played.
+file doesn't spoil a game that's still being played.
 """
 
 from __future__ import annotations

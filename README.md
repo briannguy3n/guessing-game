@@ -7,7 +7,7 @@ work out your own.
 The point of this repo: nobody picks the characters. If you pick them yourself
 you already know what's in play, and that skews every question you ask.
 
-## How a round works
+## How a game works
 
 ```
 ./guess "cats"
@@ -35,7 +35,7 @@ cp .env.example .env
 Fill in `.env`:
 
 - **`ANTHROPIC_API_KEY`** — from [console.anthropic.com](https://console.anthropic.com/settings/keys).
-  A round costs well under a cent.
+  A game costs well under a cent.
 - **Both names and emails.**
 - **`SMTP_USER` / `SMTP_PASSWORD`** — the account the mail is sent from. For
   Gmail this must be an [App Password](https://myaccount.google.com/apppasswords),
@@ -53,7 +53,7 @@ chmod +x guess
 
 Past picks are saved to `.history.jsonl` and fed back to Claude so it never
 reuses a character within a category. Entries are base64-encoded so an
-accidental `cat` of the file doesn't spoil a live round — don't go decoding it
+accidental `cat` of the file doesn't spoil a live game — don't go decoding it
 mid-game.
 
 ## Adding SMS later
@@ -62,6 +62,6 @@ mid-game.
 implements it; a `TwilioNotifier` would too, and `cli.py` wouldn't change. SMS
 needs a Twilio number (~$1.15/mo plus about a cent per text).
 
-To start rounds from your phone rather than your laptop, something has to be
+To start games from your phone rather than your laptop, something has to be
 running to receive the trigger — that's an always-on host, not just a new
 notifier.

@@ -16,7 +16,7 @@ class Pick(BaseModel):
     )
 
 
-class Round(BaseModel):
+class Game(BaseModel):
     picks: list[Pick] = Field(description="Exactly two distinct characters.")
 
 
@@ -33,7 +33,7 @@ theirs. They ask each other yes/no questions to work out who they are.
 Go wide and have fun with it. The two picks should come from completely
 different corners of the category — different franchises, different media,
 different decades, different tones. A pair that sits right next to each other
-makes for a boring round; a pair nobody would ever put in the same sentence
+makes for a boring game; a pair nobody would ever put in the same sentence
 makes a great one.
 
 Tonal contrast is doing a lot of the work. Put something epic or menacing
@@ -48,7 +48,7 @@ against something cozy or ridiculous. Pairs in this spirit:
 from film, TV, anime, games, books, comics, and memes all count, and so do
 real people: historical figures, religious figures, royalty, athletes,
 musicians, politicians. Jesus and Princess Diana are exactly as valid as
-Meowth. Mixing a real person with a fictional one in the same round is
+Meowth. Mixing a real person with a fictional one in the same game is
 encouraged where the category allows it.
 
 Requirements:
@@ -59,7 +59,7 @@ Requirements:
   cut is fine and often funnier — the mismatch is part of the joke. The floor
   is recognition, not equal fame: if the player heard the name out loud they
   should think "oh, of course," not "who?"
-- Avoid picks so obscure that the round dies. A character from a niche show
+- Avoid picks so obscure that the game dies. A character from a niche show
   is fine if that show is widely talked about; an incidental background
   character is not.
 {avoid}"""
@@ -78,7 +78,7 @@ def generate(category: str, model: str, avoid: list[str]) -> list[Pick]:
     response = client.messages.parse(
         model=model,
         max_tokens=4000,
-        output_format=Round,
+        output_format=Game,
         messages=[
             {
                 "role": "user",
