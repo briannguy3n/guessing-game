@@ -12,6 +12,9 @@ from typing import Protocol
 
 from .config import Config
 
+# Stamped on everything we send, checked on everything we read.
+OWN_MAIL_HEADER = "X-Guessing-Game"
+
 
 class Notifier(Protocol):
     def send(self, to: str, subject: str, body: str) -> None: ...
@@ -26,6 +29,11 @@ class EmailNotifier:
         message["From"] = self._config.from_address
         message["To"] = to
         message["Subject"] = subject
+        # Our own mail lands back in the watched inbox when a player is also
+        # the sending account. These two headers are how the router knows to
+        # leave it alone, and they stop other mail systems auto-replying.
+        message[OWN_MAIL_HEADER] = "game"
+        message["Auto-Submitted"] = "auto-generated"
         message.set_content(body)
 
         with smtplib.SMTP(self._config.smtp_host, self._config.smtp_port) as server:
