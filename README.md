@@ -26,7 +26,7 @@ player.
 Each group of players gets its own file, named for the group:
 
 ```
-.env.chimgee     PLAYER_1 = you, PLAYER_2 = Chimgee
+.env.c     PLAYER_1 = you, PLAYER_2 = c
 .env.friends     PLAYER_1 = you, PLAYER_2..N = everyone else
 ```
 
@@ -39,7 +39,7 @@ are gitignored. Keep your copy locally for `./guess`, and give the scheduled job
 its own copy as a secret named for the group:
 
 ```bash
-gh secret set GROUP_CHIMGEE < .env.chimgee
+gh secret set GROUP_c < .env.c
 gh secret set GROUP_FRIENDS < .env.friends
 ```
 
@@ -54,14 +54,14 @@ Send an email to your own address with the group as a plus-tag, and the
 category as the subject:
 
 ```
-To:      you+chimgee@gmail.com
+To:      you+c@gmail.com
 Subject: cats
 ```
 
 A scheduled job checks the inbox every few minutes, starts the game, and
 emails everyone. You get a confirmation that deliberately tells you nothing.
 
-Plus-addressing means one mailbox serves every group — `you+chimgee@` and
+Plus-addressing means one mailbox serves every group — `you+c@` and
 `you+friends@` both land in your normal inbox, and the tag picks the group.
 
 The trigger works whether the email is read or unread — open it, star it,
@@ -84,7 +84,7 @@ What gets ignored, silently:
 ## Starting a game from the terminal
 
 ```bash
-./guess "cats" --group chimgee
+./guess "cats" --group c
 ```
 
 `--group` is optional if you only have one group.
@@ -95,7 +95,7 @@ What gets ignored, silently:
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env
-cp .env.group.example .env.chimgee
+cp .env.group.example .env.c
 ```
 
 Fill in `.env`:
@@ -108,11 +108,11 @@ Fill in `.env`:
   password (needs 2FA turned on). The same password covers IMAP. Other
   providers work too — change `SMTP_HOST`, `SMTP_PORT`, and `IMAP_HOST`.
 
-Then fill in `.env.chimgee` with the players, and:
+Then fill in `.env.c` with the players, and:
 
 ```bash
 chmod +x guess
-./guess "cats" --group chimgee
+./guess "cats" --group c
 ```
 
 ## Running the listener
