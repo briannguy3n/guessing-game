@@ -16,6 +16,7 @@ from email.message import Message
 from email.utils import getaddresses
 
 from .config import Config
+from .delivery import OWN_MAIL_HEADER
 
 # Gmail rejects an unqualified fetch of a huge mailbox; we only ever want new mail.
 UNSEEN = "(UNSEEN)"
@@ -31,6 +32,7 @@ class Envelope:
     references: str
     auto_submitted: str
     precedence: str
+    own_mail: str
     body: str
 
 
@@ -112,6 +114,7 @@ def unread(client) -> list[Envelope]:
                 references=_text(message.get("References")),
                 auto_submitted=_text(message.get("Auto-Submitted")),
                 precedence=_text(message.get("Precedence")),
+                own_mail=_text(message.get(OWN_MAIL_HEADER)),
                 body=_plain_body(message),
             )
         )

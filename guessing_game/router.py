@@ -92,10 +92,11 @@ def classify(envelope: Envelope, config: Config) -> Request | Rejected:
     if not envelope.sender:
         return Rejected("no sender")
 
-    # Our own outgoing round emails must never start another round.
-    ours = {_normalize(config.from_address), _normalize(config.smtp_user)}
-    if _normalize(envelope.sender) in ours:
-        return Rejected("sent by us")
+    # Our own outgoing mail must never start another round. Test the header we
+    # stamp, not the sender — players commonly trigger a round from the same
+    # account the game sends from, and that has to keep working.
+    if envelope.own_mail:
+        return Rejected("one of our own emails")
 
     if _looks_automated(envelope):
         return Rejected("looks like a reply or auto-response")
