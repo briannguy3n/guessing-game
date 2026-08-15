@@ -44,6 +44,7 @@ class Config:
     smtp_port: int
     smtp_user: str
     smtp_password: str
+    imap_host: str
     from_address: str
     model: str
 
@@ -64,6 +65,7 @@ def load_config() -> Config:
         smtp_port=int(os.environ.get("SMTP_PORT", "587")),
         smtp_user=smtp_user,
         smtp_password=_require("SMTP_PASSWORD"),
+        imap_host=os.environ.get("IMAP_HOST", "imap.gmail.com"),
         from_address=os.environ.get("FROM_ADDRESS", smtp_user),
         model=os.environ.get("MODEL", "claude-opus-5"),
     )
