@@ -17,6 +17,8 @@ from dotenv import dotenv_values, load_dotenv
 REPO_ROOT = Path(__file__).resolve().parent.parent
 HISTORY_PATH = REPO_ROOT / ".history.jsonl"
 
+# Group names become part of an email address (you+chimgee@...), so keep them
+# to characters that survive a round trip through a mail header.
 GROUP_NAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 
 MIN_PLAYERS = 2
@@ -47,6 +49,7 @@ class Config:
     imap_host: str
     from_address: str
     model: str
+    daily_game_limit: int
 
 
 def _require(key: str) -> str:
@@ -68,6 +71,7 @@ def load_config() -> Config:
         imap_host=os.environ.get("IMAP_HOST", "imap.gmail.com"),
         from_address=os.environ.get("FROM_ADDRESS", smtp_user),
         model=os.environ.get("MODEL", "claude-opus-5"),
+        daily_game_limit=int(os.environ.get("DAILY_GAME_LIMIT", "10")),
     )
 
 
