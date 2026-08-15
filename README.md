@@ -35,22 +35,12 @@ players is the classic game; with three or more, everyone sees every character
 but their own.
 
 Roster files are **not** in the repo — they hold real names and addresses, and
-are gitignored. Keep your copy locally for `./guess`, and give the scheduled job
-its own copy as a secret named for the group:
-
-```bash
-gh secret set GROUP_c < .env.c
-gh secret set GROUP_FRIENDS < .env.friends
-```
-
-The job writes those secrets back to files at the start of each run. Adding a
-group means adding it to the `Restore rosters` step in
-`.github/workflows/listen.yml` as well — the workflow names each secret one by
-one, because reading the whole secrets context at once is a credential-theft
-pattern that GitHub blocks.
-
-After editing a roster, re-run the matching `gh secret set` or the job keeps
-using the old one — there is no warning when they drift.
+are gitignored. Keep your copy locally for `./guess`. To run the scheduled job,
+give it its own copy of each roster as a repo secret, then add it to the
+`Restore rosters` step in `.github/workflows/listen.yml` (each secret is named
+individually there, rather than read in bulk). After editing a roster, update
+the matching secret or the job keeps using the old one — there is no warning
+when they drift.
 
 ## Starting a game by email
 
@@ -133,8 +123,8 @@ hosting it.
 For it to run without you, `.github/workflows/listen.yml` polls every five
 minutes on GitHub Actions. To turn it on:
 
-1. Add `ANTHROPIC_API_KEY`, `SMTP_USER`, and `SMTP_PASSWORD` as repository
-   secrets (Settings → Secrets and variables → Actions)
+1. Add your `.env` values as repository secrets (Settings → Secrets and
+   variables → Actions)
 2. Merge to the default branch — **GitHub only runs scheduled workflows from
    the default branch**, never from a feature branch
 
