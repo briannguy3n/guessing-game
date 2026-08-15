@@ -1,4 +1,4 @@
-"""Start a game: ./guess "cats" --group chimgee
+"""Start a game from the terminal: ./guess "cats" --group chimgee
 
 Prints only whether the messages were sent. It must never print, log, or
 otherwise reveal any character — the person running this is a player.
