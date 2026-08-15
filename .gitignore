@@ -1,7 +1,9 @@
-# Credentials only. Group rosters (.env.chimgee, .env.friends) are committed
-# on purpose — they hold names and emails, no secrets, and the scheduled job
-# needs them. Keep this repo private.
+# Credentials and personal data. Group rosters (.env.chimgee, .env.friends)
+# are deliberately NOT in the repo — they hold real names and addresses. The
+# scheduled job restores them from GROUP_* secrets at run time.
 .env
+.env.*
+!.env*.example
 
 .venv/
 __pycache__/

@@ -29,6 +29,32 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # Rosters hold real names and addresses, so they are secrets rather than
+      # files in the repo. Written to disk here and gone when the job ends.
+      # Every GROUP_* secret becomes a roster, so a new group needs no change
+      # to this file.
+      - name: Restore rosters
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          # printf, not echo: a roster arrives as JSON with \n escapes, and
+          # echo expands those into real newlines and corrupts the JSON.
+          printf '%s' "$ALL_SECRETS" > secrets.json
+          trap 'rm -f secrets.json' EXIT
+
+          found=0
+          for key in $(jq -r 'keys[] | select(startswith("GROUP_"))' secrets.json); do
+            group=$(printf '%s' "${key#GROUP_}" | tr '[:upper:]' '[:lower:]')
+            jq -r --arg k "$key" '.[$k]' secrets.json > ".env.$group"
+            echo "restored .env.$group"
+            found=$((found + 1))
+          done
+
+          if [ "$found" -eq 0 ]; then
+            echo "No GROUP_* secrets are set, so no group can play." >&2
+            exit 1
+          fi
+
       - name: Poll inbox and start any requested games
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
