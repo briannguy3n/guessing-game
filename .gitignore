@@ -1,4 +1,7 @@
+# Credentials only. Group rosters (.env.chimgee and friends) are committed on
+# purpose — they hold names and emails, no secrets. Keep this repo private.
 .env
+
 .history.jsonl
 .venv/
 __pycache__/

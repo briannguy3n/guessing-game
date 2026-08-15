@@ -10,7 +10,7 @@ you already know what's in play, and that skews every question you ask.
 ## How a game works
 
 ```
-./guess "cats"
+./guess "cats" --group chimgee
 ```
 
 - Claude picks two famous characters in that category, deliberately from
@@ -24,29 +24,43 @@ you already know what's in play, and that skews every question you ask.
 The terminal prints `Sent.` and nothing else. It never shows either character,
 because you're one of the players.
 
+## Groups
+
+Each pair of players gets its own file, named for the group:
+
+```
+.env.chimgee     PLAYER_1 = you, PLAYER_2 = Chimgee
+```
+
+Copy `.env.group.example` to make one, and number players from 1 with no gaps.
+`--group` is optional if you only have one.
+
+These files are committed on purpose — they hold names and emails, no secrets.
+**Keep the repo private.**
+
 ## Setup
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env
+cp .env.group.example .env.chimgee
 ```
 
 Fill in `.env`:
 
 - **`ANTHROPIC_API_KEY`** — from [console.anthropic.com](https://console.anthropic.com/settings/keys).
   A game costs well under a cent.
-- **Both names and emails.**
 - **`SMTP_USER` / `SMTP_PASSWORD`** — the account the mail is sent from. For
   Gmail this must be an [App Password](https://myaccount.google.com/apppasswords),
   not your normal password (needs 2FA turned on). Other providers work too —
   change `SMTP_HOST` and `SMTP_PORT`.
 
-Then:
+Then fill in `.env.chimgee` with the two players, and:
 
 ```bash
 chmod +x guess
-./guess "cats"
+./guess "cats" --group chimgee
 ```
 
 ## No repeats
