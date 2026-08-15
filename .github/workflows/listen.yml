@@ -40,8 +40,12 @@ jobs:
         run: |
           git config user.name "guessing-game bot"
           git config user.email "actions@github.com"
-          # Any of these may not exist yet on the first ever run.
-          git add .history.jsonl .game-counts.json .handled-mail.json 2>/dev/null || true
+          # One at a time, and only if present. Naming a missing path makes
+          # git add abort and stage nothing at all, including the files that
+          # do exist — and .game-counts.json is absent until a game is played.
+          for f in .history.jsonl .game-counts.json .handled-mail.json; do
+            if [ -f "$f" ]; then git add "$f"; fi
+          done
           if git diff --cached --quiet; then
             echo "Nothing to save."
             exit 0
