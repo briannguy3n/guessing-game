@@ -43,10 +43,14 @@ gh secret set GROUP_c < .env.c
 gh secret set GROUP_FRIENDS < .env.friends
 ```
 
-The job writes every `GROUP_*` secret back to a file at the start of each run,
-so adding a group needs no change to the workflow. After editing a roster,
-re-run the matching `gh secret set` or the job keeps using the old one — there
-is no warning when they drift.
+The job writes those secrets back to files at the start of each run. Adding a
+group means adding it to the `Restore rosters` step in
+`.github/workflows/listen.yml` as well — the workflow names each secret one by
+one, because reading the whole secrets context at once is a credential-theft
+pattern that GitHub blocks.
+
+After editing a roster, re-run the matching `gh secret set` or the job keeps
+using the old one — there is no warning when they drift.
 
 ## Starting a game by email
 

@@ -31,21 +31,22 @@ jobs:
 
       # Rosters hold real names and addresses, so they are secrets rather than
       # files in the repo. Written to disk here and gone when the job ends.
-      # Every GROUP_* secret becomes a roster, so a new group needs no change
-      # to this file.
+      #
+      # Each secret is named one by one on purpose. Reading the whole secrets
+      # context at once is how workflows steal credentials, so GitHub blocks
+      # any workflow that does it. Adding a group means adding a line here.
       - name: Restore rosters
         env:
-          ALL_SECRETS: ${{ toJSON(secrets) }}
+          GROUP_CHIMGEE: ${{ secrets.GROUP_CHIMGEE }}
+          GROUP_FRIENDS: ${{ secrets.GROUP_FRIENDS }}
         run: |
-          # printf, not echo: a roster arrives as JSON with \n escapes, and
-          # echo expands those into real newlines and corrupts the JSON.
-          printf '%s' "$ALL_SECRETS" > secrets.json
-          trap 'rm -f secrets.json' EXIT
-
           found=0
-          for key in $(jq -r 'keys[] | select(startswith("GROUP_"))' secrets.json); do
-            group=$(printf '%s' "${key#GROUP_}" | tr '[:upper:]' '[:lower:]')
-            jq -r --arg k "$key" '.[$k]' secrets.json > ".env.$group"
+          for var in $(env | sed -n 's/^\(GROUP_[A-Z0-9_]*\)=.*/\1/p'); do
+            value="${!var}"
+            [ -z "$value" ] && continue
+            group=$(printf '%s' "${var#GROUP_}" | tr '[:upper:]' '[:lower:]')
+            # printf, not echo: echo would expand backslashes in a name.
+            printf '%s\n' "$value" > ".env.$group"
             echo "restored .env.$group"
             found=$((found + 1))
           done
