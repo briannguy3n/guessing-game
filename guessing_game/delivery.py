@@ -32,7 +32,7 @@ class EmailNotifier:
         # Our own mail lands back in the watched inbox when a player is also
         # the sending account. These two headers are how the router knows to
         # leave it alone, and they stop other mail systems auto-replying.
-        message[OWN_MAIL_HEADER] = "round"
+        message[OWN_MAIL_HEADER] = "game"
         message["Auto-Submitted"] = "auto-generated"
         message.set_content(body)
 

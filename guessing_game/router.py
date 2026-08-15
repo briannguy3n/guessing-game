@@ -1,7 +1,7 @@
-"""Turning one incoming email into one round.
+"""Turning one incoming email into one game.
 
 The trigger address is plus-addressed: mail to you+chimgee@gmail.com starts a
-round for the group named in .env.chimgee. The subject line is the category.
+game for the group named in .env.chimgee. The subject line is the category.
 
 Everything here is written to fail closed. Mail that does not clearly come
 from a player of a real group is dropped without a reply — bouncing would
@@ -92,8 +92,8 @@ def classify(envelope: Envelope, config: Config) -> Request | Rejected:
     if not envelope.sender:
         return Rejected("no sender")
 
-    # Our own outgoing mail must never start another round. Test the header we
-    # stamp, not the sender — players commonly trigger a round from the same
+    # Our own outgoing mail must never start another game. Test the header we
+    # stamp, not the sender — players commonly trigger a game from the same
     # account the game sends from, and that has to keep working.
     if envelope.own_mail:
         return Rejected("one of our own emails")
@@ -157,7 +157,7 @@ class Handled:
 
 
 class DailyLimit:
-    """Caps rounds per group per day so a stuck sender cannot burn API credit."""
+    """Caps games per group per day so a stuck sender cannot burn API credit."""
 
     def __init__(self, path: Path, limit: int) -> None:
         self._path = path

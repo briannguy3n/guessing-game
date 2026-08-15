@@ -1,4 +1,4 @@
-name: Check for round requests
+name: Check for game requests
 
 on:
   schedule:
@@ -8,7 +8,7 @@ on:
   # Lets you test the hosted path from a branch before merging.
   workflow_dispatch:
 
-# Two overlapping polls would send the same round twice.
+# Two overlapping polls would send the same game twice.
 concurrency:
   group: guessing-game-listener
   cancel-in-progress: false
@@ -29,24 +29,24 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Poll inbox and start any requested rounds
+      - name: Poll inbox and start any requested games
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: python -m guessing_game.listen
 
-      - name: Remember this round so characters never repeat
+      - name: Remember this game so characters never repeat
         run: |
           git config user.name "guessing-game bot"
           git config user.email "actions@github.com"
           # Any of these may not exist yet on the first ever run.
-          git add .history.jsonl .round-counts.json .handled-mail.json 2>/dev/null || true
+          git add .history.jsonl .game-counts.json .handled-mail.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nothing to save."
             exit 0
           fi
-          git commit -m "Record round"
-          # Another run may have pushed while this one played a round.
+          git commit -m "Record game"
+          # Another run may have pushed while this one played a game.
           git pull --rebase --autostash
           git push

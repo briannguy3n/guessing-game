@@ -1,4 +1,4 @@
-"""Start a round from the terminal: ./guess "cats" --group chimgee
+"""Start a game from the terminal: ./guess "cats" --group chimgee
 
 Prints only whether the messages were sent. It must never print, log, or
 otherwise reveal any character — the person running this is a player.
@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import characters, rounds
+from . import characters, game
 from .config import (
     HISTORY_PATH,
     ConfigError,
@@ -44,7 +44,7 @@ def main(argv: list[str] | None = None) -> int:
 
         config = load_config()
         group = load_group(name)
-        rounds.play(args.category, group, config, EmailNotifier(config), HISTORY_PATH)
+        game.play(args.category, group, config, EmailNotifier(config), HISTORY_PATH)
     except ConfigError as error:
         print(f"Setup problem: {error}", file=sys.stderr)
         return 1
@@ -53,7 +53,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     except Exception:
         # Deliberately terse: a traceback here could surface a character name.
-        print("Something went wrong sending the round. Nothing was recorded.", file=sys.stderr)
+        print("Something went wrong sending the game. Nothing was recorded.", file=sys.stderr)
         return 1
 
     print(f"Sent. Category: {args.category} — group: {name}")

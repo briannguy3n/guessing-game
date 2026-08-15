@@ -1,4 +1,4 @@
-"""Playing one round: pick characters, tell each player about everyone else.
+"""Playing one game: pick characters, tell each player about everyone else.
 
 Nothing here may print or return a character name. Callers include the CLI,
 which is run by a player, and the email router, which replies to one.

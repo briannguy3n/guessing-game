@@ -49,7 +49,7 @@ class Config:
     imap_host: str
     from_address: str
     model: str
-    daily_round_limit: int
+    daily_game_limit: int
 
 
 def _require(key: str) -> str:
@@ -71,7 +71,7 @@ def load_config() -> Config:
         imap_host=os.environ.get("IMAP_HOST", "imap.gmail.com"),
         from_address=os.environ.get("FROM_ADDRESS", smtp_user),
         model=os.environ.get("MODEL", "claude-opus-5"),
-        daily_round_limit=int(os.environ.get("DAILY_ROUND_LIMIT", "10")),
+        daily_game_limit=int(os.environ.get("DAILY_GAME_LIMIT", "10")),
     )
 
 
@@ -121,7 +121,7 @@ def load_group(name: str) -> Group:
 
     if len(players) < MIN_PLAYERS:
         raise ConfigError(
-            f"{path.name} has {len(players)} player(s). A round needs at least {MIN_PLAYERS}."
+            f"{path.name} has {len(players)} player(s). A game needs at least {MIN_PLAYERS}."
         )
 
     addresses = [p.address.lower() for p in players]

@@ -7,7 +7,7 @@ own.
 The point of this repo: nobody picks the characters. If you pick them yourself
 you already know what's in play, and that skews every question you ask.
 
-## How a round works
+## How a game works
 
 Email the game, or run it from the terminal. Either way:
 
@@ -37,7 +37,7 @@ but their own.
 These files are committed on purpose — they hold names and emails, no secrets,
 and the scheduled job needs them. **Keep the repo private.**
 
-## Starting a round by email
+## Starting a game by email
 
 Send an email to your own address with the group as a plus-tag, and the
 category as the subject:
@@ -47,7 +47,7 @@ To:      you+chimgee@gmail.com
 Subject: cats
 ```
 
-A scheduled job checks the inbox every few minutes, starts the round, and
+A scheduled job checks the inbox every few minutes, starts the game, and
 emails everyone. You get a confirmation that deliberately tells you nothing.
 
 Plus-addressing means one mailbox serves every group — `you+chimgee@` and
@@ -60,17 +60,17 @@ your mailbox; it keeps its own note of which messages it has handled, in
 
 The very first run has nothing to compare against, so it records what is
 already in the inbox and acts on none of it. That stops old mail replaying
-rounds. Send your trigger after that first run.
+games. Send your trigger after that first run.
 
 What gets ignored, silently:
 
 - Mail from anyone outside that group's roster
 - Mail to a tag with no matching `.env.<group>` file
 - Replies, forwards, and auto-responders, so the game's own emails can't
-  trigger fresh rounds
-- Anything past the group's daily round limit
+  trigger fresh games
+- Anything past the group's daily game limit
 
-## Starting a round from the terminal
+## Starting a game from the terminal
 
 ```bash
 ./guess "cats" --group chimgee
@@ -90,7 +90,7 @@ cp .env.group.example .env.chimgee
 Fill in `.env`:
 
 - **`ANTHROPIC_API_KEY`** — from [console.anthropic.com](https://console.anthropic.com/settings/keys).
-  A round costs well under a cent.
+  A game costs well under a cent.
 - **`SMTP_USER` / `SMTP_PASSWORD`** — the mailbox mail is sent from and the
   listener watches. For Gmail this must be an
   [App Password](https://myaccount.google.com/apppasswords), not your normal
@@ -123,13 +123,13 @@ minutes on GitHub Actions. To turn it on:
 2. Merge to the default branch — **GitHub only runs scheduled workflows from
    the default branch**, never from a feature branch
 
-Before merging you can still test the hosted path: Actions → *Check for round
+Before merging you can still test the hosted path: Actions → *Check for game
 requests* → Run workflow, and pick your branch. That path works from anywhere.
 
 Two caveats worth knowing. GitHub's scheduler drifts under load, so five
 minutes can stretch to twenty — fine for a party game. And scheduled workflows
 switch themselves off after 60 days without repo activity; the job commits
-history back on every round, which keeps that clock reset as long as you're
+history back on every game, which keeps that clock reset as long as you're
 playing.
 
 Moving to a small always-on box later is a cron line calling the same command.
@@ -139,7 +139,7 @@ Nothing in the code changes.
 
 Past picks are saved to `.history.jsonl` and fed back to Claude so it never
 reuses a character within a category. Entries are base64-encoded so an
-accidental `cat` of the file doesn't spoil a live round — don't go decoding it
+accidental `cat` of the file doesn't spoil a live game — don't go decoding it
 mid-game.
 
 The scheduled job commits this file back to the repo, so the memory survives
@@ -150,5 +150,5 @@ histories drift apart.
 
 `guessing_game/delivery.py` defines a `Notifier` with one method.
 `EmailNotifier` implements it; a `TwilioNotifier` would too, and nothing that
-starts a round would change. SMS needs a Twilio number (~$1.15/mo plus about a
+starts a game would change. SMS needs a Twilio number (~$1.15/mo plus about a
 cent per text).
