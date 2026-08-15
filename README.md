@@ -34,8 +34,19 @@ Copy `.env.group.example` to make one. Number players from 1 with no gaps. Two
 players is the classic game; with three or more, everyone sees every character
 but their own.
 
-These files are committed on purpose — they hold names and emails, no secrets,
-and the scheduled job needs them. **Keep the repo private.**
+Roster files are **not** in the repo — they hold real names and addresses, and
+are gitignored. Keep your copy locally for `./guess`, and give the scheduled job
+its own copy as a secret named for the group:
+
+```bash
+gh secret set GROUP_CHIMGEE < .env.chimgee
+gh secret set GROUP_FRIENDS < .env.friends
+```
+
+The job writes every `GROUP_*` secret back to a file at the start of each run,
+so adding a group needs no change to the workflow. After editing a roster,
+re-run the matching `gh secret set` or the job keeps using the old one — there
+is no warning when they drift.
 
 ## Starting a game by email
 
