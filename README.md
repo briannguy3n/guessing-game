@@ -1,8 +1,8 @@
 # guessing-game
 
-Two people, one category. Each person is assigned a character they don't know.
-You each know the *other's* character, and you ask yes/no questions until you
-work out your own.
+A group, one category. Each person is assigned a character they don't know.
+Everyone else can see it, and you ask yes/no questions until you work out your
+own.
 
 The point of this repo: nobody picks the characters. If you pick them yourself
 you already know what's in play, and that skews every question you ask.
@@ -13,27 +13,30 @@ you already know what's in play, and that skews every question you ask.
 ./guess "cats" --group chimgee
 ```
 
-- Claude picks two famous characters in that category, deliberately from
-  opposite corners of it — for "cats", think Meowth and Hello Kitty, not two
-  cats from the same cartoon
+- Claude picks one character per player, deliberately from opposite corners of
+  the category — for "cats", think Meowth and Hello Kitty, not two cats from
+  the same cartoon
 - Real people count. Jesus, Princess Diana, and Meowth are all fair game
-- You get an email with **her** character
-- She gets an email with **your** character
-- Neither of you knows your own — start asking
+- Everyone gets an email listing every character **except their own**
+- Start asking
 
-The terminal prints `Sent.` and nothing else. It never shows either character,
+The terminal prints `Sent.` and nothing else. It never shows a character,
 because you're one of the players.
 
 ## Groups
 
-Each pair of players gets its own file, named for the group:
+Each group of players gets its own file, named for the group:
 
 ```
 .env.chimgee     PLAYER_1 = you, PLAYER_2 = Chimgee
+.env.friends     PLAYER_1 = you, PLAYER_2..N = everyone else
 ```
 
 Copy `.env.group.example` to make one, and number players from 1 with no gaps.
 `--group` is optional if you only have one.
+
+Two players is the classic game. With three or more, everyone sees every
+character but their own.
 
 These files are committed on purpose — they hold names and emails, no secrets.
 **Keep the repo private.**
@@ -56,7 +59,7 @@ Fill in `.env`:
   not your normal password (needs 2FA turned on). Other providers work too —
   change `SMTP_HOST` and `SMTP_PORT`.
 
-Then fill in `.env.chimgee` with the two players, and:
+Then fill in `.env.chimgee` with the players, and:
 
 ```bash
 chmod +x guess
